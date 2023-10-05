@@ -55,11 +55,12 @@ func main() {
 		ignore[keychartoRawCode(ignoreKey)] = true
 	}
 
-	kEnter := uint16(36)
-	kBS := uint16(51)
+	kReturn := keychartoRawCode("return")
+	kDelete := keychartoRawCode("delete")
 
 	last := time.Now()
 	lastCode := uint16(0)
+	lastKey := uint16(0)
 	lastKind := uint8(0)
 	ignoreThis := false
 
@@ -83,13 +84,16 @@ func main() {
 				continue
 			}
 			switch e.Rawcode {
-			case kEnter:
-				speaker.Play(kbDing.streamer())
-			case kBS:
+			case kReturn:
+				if lastKey != kReturn {
+					speaker.Play(kbDing.streamer())
+				}
+			case kDelete:
 				speaker.Play(kbBs.streamer())
 			default:
 				speaker.Play(kbDown.streamer())
 			}
+			lastKey = e.Rawcode
 		case hook.KeyUp:
 			lastKind = e.Kind
 			ignoreThis = false
@@ -99,7 +103,7 @@ func main() {
 				continue
 			}
 			switch e.Rawcode {
-			case kEnter, kBS:
+			case kReturn, kDelete:
 				// no sound
 			default:
 				speaker.Play(kbUp.streamer())

@@ -58,10 +58,28 @@ func main() {
 	kEnter := uint16(36)
 	kBS := uint16(51)
 
+	last := time.Now()
+	lastCode := uint16(0)
+	lastKind := uint8(0)
+	ignoreThis := false
+
 	for e := range events {
 		switch e.Kind {
 		case hook.KeyDown:
-			if ignore[e.Rawcode] {
+			since := time.Since(last)
+			// fmt.Printf("\n%v\n", since)
+			if e.Rawcode == lastCode {
+				if since < 60*time.Millisecond || e.Kind == lastKind {
+					ignoreThis = true
+				}
+			} else {
+				ignoreThis = false
+			}
+			last = time.Now()
+			lastKind = e.Kind
+
+			lastCode = e.Rawcode
+			if ignoreThis || ignore[e.Rawcode] {
 				continue
 			}
 			switch e.Rawcode {
@@ -73,6 +91,8 @@ func main() {
 				speaker.Play(kbDown.streamer())
 			}
 		case hook.KeyUp:
+			lastKind = e.Kind
+			ignoreThis = false
 			// log.Println()
 			// log.Println("up: raw", e.Rawcode, "keycode", e.Keycode, "mask", e.Mask, "keychar", e.Keychar, "toKeychar", rawcodetoKeychar(e.Rawcode))
 			if ignore[e.Rawcode] {

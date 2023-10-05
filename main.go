@@ -11,14 +11,18 @@ import (
 func main() {
 	log.SetFlags(0)
 
-	kbDown, err := newPalette("kd1.mp3", "kd2.mp3", "kd3.mp3")
+	kbDown, err := newPalette("kd1.mp3", "kd2.mp3")
 	if err != nil {
 		log.Fatal(err)
 	}
-	kbUp, err := newPalette("ku2.mp3", "ku3.mp3")
+	kbUp, err := newPalette("ku1.mp3", "ku2.mp3")
 	if err != nil {
 		log.Fatal(err)
 	}
+	// kbSounds, err := newPaletteDownUp("kd1.mp3", "ku1.mp3", "kd2.mp3", "ku2.mp3")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 	kbDing, err := newPalette("kding.mp3")
 	if err != nil {
 		log.Fatal(err)
@@ -28,8 +32,9 @@ func main() {
 		log.Fatal(err)
 	}
 	format := kbDown.format
+	// format := kbSounds.format
 
-	speaker.Init(format.SampleRate, format.SampleRate.N(time.Second/100))
+	speaker.Init(format.SampleRate, format.SampleRate.N(time.Second/200))
 
 	l := newListener()
 	events := l.start()
@@ -91,6 +96,7 @@ func main() {
 			case kDelete:
 				speaker.Play(kbBs.streamer())
 			default:
+				// speaker.Play(kbSounds.streamer())
 				speaker.Play(kbDown.streamer())
 			}
 			lastKey = e.Rawcode

@@ -35,13 +35,35 @@ func main() {
 	events := l.start()
 	defer l.stop()
 
+	ignore := map[uint16]bool{}
+	for _, ignoreKey := range []string{
+		"command",
+		"right command",
+		"shift",
+		"right shift",
+		"option",
+		"right option",
+		"escape",
+		"fn",
+		"tab",
+		"control",
+		"left arrow",
+		"up arrow",
+		"down arrow",
+		"right arrow",
+	} {
+		ignore[keychartoRawCode(ignoreKey)] = true
+	}
+
 	kEnter := uint16(36)
 	kBS := uint16(51)
 
 	for e := range events {
 		switch e.Kind {
 		case hook.KeyDown:
-			// log.Println("down: raw", e.Rawcode, "keycode", e.Keycode, "mask", e.Mask, "keychar", e.Keychar)
+			if ignore[e.Rawcode] {
+				continue
+			}
 			switch e.Rawcode {
 			case kEnter:
 				speaker.Play(kbDing.streamer())
@@ -51,10 +73,14 @@ func main() {
 				speaker.Play(kbDown.streamer())
 			}
 		case hook.KeyUp:
-			// log.Println("up: raw", e.Rawcode, "keycode", e.Keycode, "mask", e.Mask, "keychar", e.Keychar)
+			// log.Println()
+			// log.Println("up: raw", e.Rawcode, "keycode", e.Keycode, "mask", e.Mask, "keychar", e.Keychar, "toKeychar", rawcodetoKeychar(e.Rawcode))
+			if ignore[e.Rawcode] {
+				continue
+			}
 			switch e.Rawcode {
 			case kEnter, kBS:
-				//
+				// no sound
 			default:
 				speaker.Play(kbUp.streamer())
 			}

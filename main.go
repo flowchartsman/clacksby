@@ -11,30 +11,92 @@ import (
 func main() {
 	log.SetFlags(0)
 
-	kbDown, err := newPalette("kd1.mp3", "kd2.mp3")
-	if err != nil {
-		log.Fatal(err)
-	}
-	kbUp, err := newPalette("ku1.mp3", "ku2.mp3")
-	if err != nil {
-		log.Fatal(err)
-	}
-	// kbSounds, err := newPaletteDownUp("kd1.mp3", "ku1.mp3", "kd2.mp3", "ku2.mp3")
+	// smpDown, err := newPalette(
+	// 	"fallout/01.wav",
+	// 	"fallout/02.wav",
+	// 	"fallout/03.wav",
+	// 	"fallout/04.wav",
+	// 	"fallout/05.wav",
+	// 	"fallout/06.wav",
+	// )
+	// smpEnter, err := newPalette(
+	// 	"fallout/charenter_01.wav",
+	// 	"fallout/charenter_02.wav",
+	// 	"fallout/charenter_03.wav",
+	// )
 	// if err != nil {
 	// 	log.Fatal(err)
 	// }
-	kbDing, err := newPalette("kding.mp3")
-	if err != nil {
-		log.Fatal(err)
-	}
-	kbBs, err := newPalette("kbs.mp3")
-	if err != nil {
-		log.Fatal(err)
-	}
-	format := kbDown.format
-	// format := kbSounds.format
+	// smpDelete, err := newPalette("fallout/charenter_01.wav")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	speaker.Init(format.SampleRate, format.SampleRate.N(time.Second/200))
+	// smpDown, err := newPalette(
+	// 	"nk-cream/A.mp3",
+	// 	"nk-cream/B.mp3",
+	// 	"nk-cream/C.mp3",
+	// 	"nk-cream/D.mp3",
+	// 	"nk-cream/E.mp3",
+	// 	"nk-cream/F.mp3",
+	// 	"nk-cream/G.mp3",
+	// 	"nk-cream/H.mp3",
+	// 	"nk-cream/I.mp3",
+	// 	"nk-cream/J.mp3",
+	// 	"nk-cream/K.mp3",
+	// 	"nk-cream/L.mp3",
+	// 	"nk-cream/M.mp3",
+	// 	"nk-cream/N.mp3",
+	// 	"nk-cream/O.mp3",
+	// 	"nk-cream/P.mp3",
+	// 	"nk-cream/Q.mp3",
+	// 	"nk-cream/R.mp3",
+	// 	"nk-cream/S.mp3",
+	// 	"nk-cream/T.mp3",
+	// 	"nk-cream/U.mp3",
+	// 	"nk-cream/V.mp3",
+	// 	"nk-cream/W.mp3",
+	// 	"nk-cream/X.mp3",
+	// 	"nk-cream/Y.mp3",
+	// 	"nk-cream/Z.mp3",
+	// )
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// smpDelete, err := newPalette("nk-cream/BACKSPACE.mp3")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// smpEnter, err := newPalette("nk-cream/ENTER.mp3")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	smpDown, err := newPalette("typewriter/kd1.mp3", "typewriter/kd2.mp3")
+	if err != nil {
+		log.Fatal(err)
+	}
+	smpUp, err := newPalette("typewriter/ku1.mp3", "typewriter/ku2.mp3")
+	if err != nil {
+		log.Fatal(err)
+	}
+	// smp, err := newPaletteDownUp("kd1.mp3", "ku1.mp3", "kd2.mp3", "ku2.mp3")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	smpEnter, err := newPalette("typewriter/kcr.mp3")
+	if err != nil {
+		log.Fatal(err)
+	}
+	smpDelete, err := newPalette("typewriter/kbs.mp3")
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	l := newListener()
 	events := l.start()
@@ -69,6 +131,9 @@ func main() {
 	lastKind := uint8(0)
 	ignoreThis := false
 
+	format := smpDown.format
+	speaker.Init(format.SampleRate, format.SampleRate.N(time.Second/200))
+
 	for e := range events {
 		switch e.Kind {
 		case hook.KeyDown:
@@ -91,13 +156,13 @@ func main() {
 			switch e.Rawcode {
 			case kReturn:
 				if lastKey != kReturn {
-					speaker.Play(kbDing.streamer())
+					speaker.Play(smpEnter.streamer())
 				}
 			case kDelete:
-				speaker.Play(kbBs.streamer())
+				speaker.Play(smpDelete.streamer())
 			default:
-				// speaker.Play(kbSounds.streamer())
-				speaker.Play(kbDown.streamer())
+				// speaker.Play(smp.streamer())
+				speaker.Play(smpDown.streamer())
 			}
 			lastKey = e.Rawcode
 		case hook.KeyUp:
@@ -112,7 +177,7 @@ func main() {
 			case kReturn, kDelete:
 				// no sound
 			default:
-				speaker.Play(kbUp.streamer())
+				speaker.Play(smpUp.streamer())
 			}
 		}
 	}

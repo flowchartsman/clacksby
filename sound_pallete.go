@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/mp3"
+	"github.com/faiface/beep/wav"
 )
 
 type palette struct {
@@ -22,7 +25,22 @@ func newPalette(filenames ...string) (*palette, error) {
 		if err != nil {
 			return nil, err
 		}
-		s, format, err := mp3.Decode(f)
+		var (
+			s      beep.StreamSeekCloser
+			format beep.Format
+		)
+
+		ext := strings.ToLower(filepath.Ext(f.Name()))
+
+		switch ext {
+		case ".wav":
+			s, format, err = wav.Decode(f)
+		case ".mp3":
+			s, format, err = mp3.Decode(f)
+		default:
+			return nil, fmt.Errorf("unknown/unsupported sample extension %s", ext)
+		}
+
 		if err != nil {
 			return nil, err
 		}

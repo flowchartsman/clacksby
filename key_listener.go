@@ -6,6 +6,7 @@ import (
 
 type keyboardEventListener struct {
 	enabled   bool
+	stopChan  chan struct{}
 	eventChan chan hook.Event
 }
 

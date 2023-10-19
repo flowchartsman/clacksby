@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"time"
 
@@ -10,6 +11,9 @@ import (
 
 func main() {
 	log.SetFlags(0)
+	var dingCol int
+	flag.IntVar(&dingCol, "ding-col", 0, "columns for bell effect. 0=disabled")
+	flag.Parse()
 
 	// smpDown, err := newPalette(
 	// 	"fallout/01.wav",
@@ -94,6 +98,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	smpDing, err := newPalette("typewriter/kding.mp3")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -122,6 +127,16 @@ func main() {
 		ignore[keychartoRawCode(ignoreKey)] = true
 	}
 
+	disableCol := map[uint16]bool{}
+	for _, resetKey := range []string{
+		"up arrow",
+		"down arrow",
+		"left arrow",
+		"right arrow",
+	} {
+		disableCol[keychartoRawCode(resetKey)] = true
+	}
+
 	kReturn := keychartoRawCode("return")
 	kDelete := keychartoRawCode("delete")
 
@@ -134,6 +149,8 @@ func main() {
 	format := smpDown.format
 	speaker.Init(format.SampleRate, format.SampleRate.N(time.Second/200))
 
+	var col int
+	crEnabled := dingCol > 0
 	for e := range events {
 		switch e.Kind {
 		case hook.KeyDown:
@@ -149,20 +166,37 @@ func main() {
 			last = time.Now()
 			lastKind = e.Kind
 
+			if disableCol[e.Rawcode] {
+				crEnabled = false
+			}
+
 			lastCode = e.Rawcode
 			if ignoreThis || ignore[e.Rawcode] {
 				continue
 			}
 			switch e.Rawcode {
 			case kReturn:
+				if dingCol > 0 {
+					col = 0
+					crEnabled = true
+				}
 				if lastKey != kReturn {
 					speaker.Play(smpEnter.streamer())
 				}
 			case kDelete:
+				if crEnabled {
+					if col > 0 {
+						col--
+					}
+				}
 				speaker.Play(smpDelete.streamer())
 			default:
+				col++
 				// speaker.Play(smp.streamer())
 				speaker.Play(smpDown.streamer())
+				if crEnabled && col == dingCol {
+					speaker.Play(smpDing.streamer())
+				}
 			}
 			lastKey = e.Rawcode
 		case hook.KeyUp:
